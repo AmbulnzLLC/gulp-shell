@@ -108,6 +108,22 @@ default: `false`
 
 By default, it will print the command output.
 
+#### options.stdoutPrefix
+
+type: `String`
+
+default: `null`
+
+will add a prefix to each line of the command's stdout (options.quiet must be false).
+
+#### options.stderrPrefix
+
+type: `String`
+
+default: `null`
+
+will add a prefix to each line of the command's stderr (options.quiet must be false).
+
 #### options.interactive
 
 type: `Boolean`

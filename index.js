@@ -4,6 +4,7 @@ var exec = require('child_process').exec
 var gutil = require('gulp-util')
 var path = require('path')
 var through = require('through2')
+var prefix = require('prefix-stream');
 
 var PLUGIN_NAME = 'gulp-shell'
 
@@ -26,6 +27,8 @@ function normalizeOptions(options) {
     errorMessage: 'Command `<%= command %>` failed with exit code <%= error.code %>',
     quiet: false,
     interactive: false,
+	  stdoutPrefix: null,
+	  stderrPrefix: null,
     cwd: process.cwd(),
     maxBuffer: 16 * 1024 * 1024
   }, options)
@@ -82,8 +85,18 @@ function runCommands(commands, options, file, done) {
     }
 
     if (!options.quiet) {
-      child.stdout.pipe(process.stdout)
-      child.stderr.pipe(process.stderr)
+      if (options.stdoutPrefix) {
+	      child.stdout.pipe(prefix(options.stdoutPrefix)).pipe(process.stdout)
+      }
+      else {
+	      child.stdout.pipe(process.stdout)
+      }
+	    if (options.stderrPrefix) {
+		    child.stderr.pipe(prefix(options.stderrPrefix)).pipe(process.stderr)
+	    }
+	    else {
+		    child.stderr.pipe(process.stderr)
+	    }
     }
   }, done)
 }
