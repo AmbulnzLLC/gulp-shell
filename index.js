@@ -46,12 +46,30 @@ function runCommands (commands, options, file, done) {
       gutil.log(gutil.colors.cyan(command))
     }
 
+    const stdoutPrefix = options.quiet ? undefined : options.stdoutPrefix || options.prefix
+    const stderrPrefix = options.quiet ? undefined : options.stderrPrefix || options.prefix
+
+    const stdinOption = options.quiet ? 'ignore' : process.stdin
+    const stdoutOption = options.quiet ? 'ignore' : stdoutPrefix ? 'pipe' : process.stdout
+    const stderrOption = options.quiet ? 'ignore' : stderrPrefix ? 'pipe' : process.stderr
+
     const child = spawn(command, {
       env: options.env,
       cwd: gutil.template(options.cwd, context),
       shell: options.shell,
-      stdio: options.quiet ? 'ignore' : 'inherit'
+      stdio: [stdinOption, stdoutOption, stderrOption]
     })
+
+    if (stdoutPrefix) {
+      child.stdout.on('data', (data) => {
+        process.stdout.write(`${stdoutPrefix}${data}`)
+      });
+    }
+    if (stderrPrefix) {
+      child.stderr.on('data', (data) => {
+        process.stderr.write(`${stderrPrefix}${data}`)
+      });
+    }
 
     child.on('exit', (code) => {
       if (code === 0 || options.ignoreErrors) {
@@ -75,16 +93,17 @@ function shell (commands, options) {
   commands = normalizeCommands(commands)
   options = normalizeOptions(options)
 
-  const stream = through.obj(function (file, _encoding, done) {
-    runCommands(commands, options, file, (error) => {
-      if (error) {
-        this.emit('error', error)
-      } else {
-        this.push(file)
-      }
-      done()
+  const stream = through.obj(
+    function (file, _encoding, done) {
+      runCommands(commands, options, file, (error) => {
+        if (error) {
+          this.emit('error', error)
+        } else {
+          this.push(file)
+        }
+        done()
+      })
     })
-  })
 
   stream.resume()
 
