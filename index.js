@@ -4,6 +4,7 @@ const gutil = require('gulp-util')
 const path = require('path')
 const spawn = require('child_process').spawn
 const through = require('through2')
+const LineWrapper = require('stream-line-wrapper');
 
 const PLUGIN_NAME = 'gulp-shell'
 
@@ -61,14 +62,12 @@ function runCommands (commands, options, file, done) {
     })
 
     if (stdoutPrefix) {
-      child.stdout.on('data', (data) => {
-        process.stdout.write(`${stdoutPrefix}${data}`)
-      });
+      const stdoutLineWrapper = new LineWrapper({ prefix: stdoutPrefix });
+      child.stdout.pipe(stdoutLineWrapper).pipe(process.stdout);
     }
     if (stderrPrefix) {
-      child.stderr.on('data', (data) => {
-        process.stderr.write(`${stderrPrefix}${data}`)
-      });
+      const stderrLineWrapper = new LineWrapper({ prefix: stderrPrefix });
+      child.stderr.pipe(stderrLineWrapper).pipe(process.stderr);
     }
 
     child.on('exit', (code) => {
