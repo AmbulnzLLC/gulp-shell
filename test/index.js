@@ -8,8 +8,8 @@ const shell = require('..')
 
 function expectToBeOk (stream, done) {
   stream
-  .on('error', done)
-  .on('data', () => { done() })
+    .on('error', done)
+    .on('data', () => { done() })
 }
 
 describe('gulp-shell(commands, options)', () => {
@@ -65,6 +65,40 @@ describe('gulp-shell(commands, options)', () => {
       expect(task).to.be.a('function')
 
       task(done)
+    })
+  })
+
+  describe('.task(commands, options) with prefix', () => {
+    it("it outputs with a prefix", (done) => {
+      const prefix = 'PREFIX:'
+      const stderrPrefix = 'STDERR_PREFIX:'
+      const task = shell.task([`echo I should have prefix ${prefix}!`, '>&2 echo "I should also have an stderrPrefix"'], {prefix, stderrPrefix})
+
+      expect(task).to.be.a('function')
+
+      task((error, out) => {
+        if (error) {
+          done()
+          return
+        }
+        done(error, out)
+      })
+    })
+
+    it("it outputs with a stderrPrefix", (done) => {
+      const stdoutPrefix = 'STDOUT_PREFIX:'
+      const stderrPrefix = 'STDERR_PREFIX:'
+      const task = shell.task(['echo I have am STDOUT prefix','>&2 echo "I should have an STDERR prefix"'], {stdoutPrefix, stderrPrefix})
+
+      expect(task).to.be.a('function')
+
+      task((error, out) => {
+        if (error) {
+          done()
+          return
+        }
+        done(error, out)
+      })
     })
   })
 

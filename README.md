@@ -85,6 +85,32 @@ default: `false`
 
 By default, it will print the command output.
 
+#### options.prefix
+
+type: `String`
+
+default: undefined
+
+Will add this string value to the stdout and stderr for the task. 
+
+will be override with stderrPrefix or stdoutPrefix
+
+#### options.stdoutPrefix
+
+type: `String`
+
+default: undefined
+
+Will prepend this prefix to each line of the stdout of the task.  Will use prefix if not defined.
+
+#### options.stderrPrefix
+
+type: `String`
+
+default: undefined
+
+Will prepend this prefix to each line of the stderr of the task.  Will use prefix if not defined.
+
 #### options.verbose
 
 type: `Boolean`
